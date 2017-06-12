@@ -5,6 +5,7 @@ class World {
     constructor(width, height, fishStartCount, fishReproductionTicks, fishEnergy, sharkStartCount, sharkReproductionTicks, sharkEnergy) {
         this.width = width;
         this.height = height;
+        this.length = this.width * this.height;
         this.fishStartCount = fishStartCount;
         this.fishReproductionTicks = fishReproductionTicks;
         this.fishEnergy = fishEnergy;
@@ -25,22 +26,38 @@ class World {
         }
 
         for (var f = 0; f < this.fishStartCount; f++) {
-            let x = Math.round(Math.random() * this.width);
-            let y = Math.round(Math.random() * this.height);
-            if (this.isFree(x, y)) {
-                WorldElement.create()
-            }
+            let x, y, elem;
 
+            do {
+                x = Math.round(Math.random() * this.width);
+                y = Math.round(Math.random() * this.height);
+            } while (!this.isFree(x, y))
+
+            elem = WorldElement.create(WorldElement.TYPE_FISH, this.fishEnergy, Math.floor(Math.random() * this.fishReproductionTicks) | 4)
+            this.setValueAtPosition(x, y, elem)
+
+        }
+
+        for (var f = 0; f < this.sharkStartCount; f++) {
+            let x, y, elem;
+
+            do {
+                x = Math.round(Math.random() * this.width);
+                y = Math.round(Math.random() * this.height);
+            } while (!this.isFree(x, y))
+
+            elem = WorldElement.create(WorldElement.TYPE_SHARK, this.sharkEnergy, Math.floor(Math.random() * this.sharkReproductionTicks) | 4)
+            this.setValueAtPosition(x, y, elem)
         }
 
     };
 
     isFree = (x, y) => {
-        return this.getDataAtPosition(x, y) > 0;
+        return this.getIndexAtPosition(x, y) > 0;
     };
 
 
-    getDataAtPosition = (x, y) => {
+    getIndexAtPosition = (x, y) => {
         if (x < 0) {
             x += this.width;
         }
@@ -57,15 +74,23 @@ class World {
     }
 
     setValueAtPosition = (x, y, v) => {
-        this.data[this.getDataAtPosition(x, y)] = v;
+        this.data[this.getIndexAtPosition(x, y)] = v;
     }
 
     setValueAtIndex = (index, v) => {
-        this.data[this.getDataAtPosition(x, y)] = v;
+        this.data[this.getIndexAtPosition(x, y)] = v;
     }
 
     getValueAtPosition = (x, y) => {
-        return this.data[this.getDataAtPosition(x, y)];
+        return this.data[this.getIndexAtPosition(x, y)];
+    }
+
+    getValueAtIndexUnsafe = (index) => {
+        return this.data[index];
+    }
+
+    getLength = (index) => {
+        return this.data.length;
     }
 
 
@@ -174,7 +199,7 @@ class World {
         this.noTicks++;
         for (x = 0; x < this.width; x++) {
             for (y = 0; y < this.height; y++) {
-                currentElement = this.getDataAtPosition(x, y);
+                currentElement = this.getValueAtPosition(x, y);
 
                 if (WorldElement.TYPE_FISH === WorldElement.typeOf(currentElement)) {
                     noFish++;
