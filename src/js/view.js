@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var updateCanvas = function (options) {
 
 
-        ctx.fillStyle = 'rgba(255,0, 255, 1)';
+        ctx.fillStyle = 'rgba(0,0, 0, 1)';
         ctx.fillRect(0, 0, canvas.width, canvas.height)
 
 

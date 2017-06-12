@@ -13,6 +13,7 @@ class World {
         this.sharkEnergy = sharkEnergy;
         this.data = null;
         this.resIndices = new Array(8);
+        this.noTicks = 0;
     };
 
     init = () => {
@@ -109,13 +110,13 @@ class World {
 
         if (breedC <= 0) {
             breedC = reproduceCFish;
-            replacementElement = WorldElement.create(tFish, 255, Math.floor(Math.random() * reproduceCFish)) | 4;
+            replacementElement = WorldElement.create(WorldElement.TYPE_FISH, 255, Math.floor(Math.random() * reproduceCFish)) | 4;
         }
 
         newPos = this.randomNeighborOfType(theWorld, 0, x, y);
 
         if (newPos > 0) {
-            updatedFish = WorldElement.create(tFish, 128, breedC);
+            updatedFish = WorldElement.create(WorldElement.TYPE_FISH, 128, breedC);
             this.setValueAtPosition(x, y, replacementElement);
             this.setValueAtIndex(newPos, updatedFish | 4)
         }
@@ -138,89 +139,55 @@ class World {
 
         if (breedC <= 0) {
             breedC = this.sharkReproductionTicks;
-            replacementElement = WorldElement.create(tShark, Math.floor(Math.random() * initialEnergyShark), Math.floor(Math.random() * reproduceCShark)) | 4;
+            replacementElement = WorldElement.create(WorldElement.TYPE_SHARK, Math.floor(Math.random() * initialEnergyShark), Math.floor(Math.random() * reproduceCShark)) | 4;
         }
 
-        newPos = randomNeighborOfType(theWorld, tFish, x, y);
+        newPos = randomNeighborOfType(theWorld, WorldElement.TYPE_FISH, x, y);
         if (newPos > 0) {
             energy += 2;
-            if (energy > 255) energy = 255;
-            updatedFish = newElement(tShark, energy, breedC);
-            theWorld->canvas[x + (theWorld->width * y)] = replacementElement;
-            theWorld->canvas[newPos] = updatedFish | 4;
+            if (energy > 255) {
+                energy = 255
+            }
+            ;
+            updatedFish = WorldElement.create(WorldElement.TYPE_SHARK, energy, breedC);
+            this.setValueAtPosition(x, y, replacementElement)
+            this.setValueAtIndex(newPos, updatedFish | 4)
             return;
         }
 
-        newPos = randomNeighborOfType(theWorld, 0, x, y);
+        newPos = randomNeighborOfType(theWorld, WorldElement.TYPE_EMPTY, x, y);
         if (newPos > 0) {
-            updatedFish = newElement(tShark, energy, breedC);
-            theWorld->canvas[x + (theWorld->width * y)] = replacementElement;
-            theWorld->canvas[newPos] = updatedFish | 4;
+            updatedFish = WorldElement.create(WorldElement.TYPE_SHARK, energy, breedC);
+            this.setValueAtPosition(x, y, replacementElement)
+            this.setValueAtIndex(newPos, updatedFish | 4)
         }
 
     }
 
 
-    int
+    doWorldTick = () => {
 
-    doWorldTick(world
+        var x, y;
+        var currentElement;
+        var noFish = 0;
+        var noShark = 0;
+        this.noTicks++;
+        for (x = 0; x < this.width; x++) {
+            for (y = 0; y < this.height; y++) {
+                currentElement = this.getDataAtPosition(x, y);
 
-    * theWorld
-) {
-    register
-    int
-    x
-,
-    y;
-    int
-    currentElement;
-    noFish = 0;
-    noShark = 0;
-    noTicks
-++
-    ;
-    for(x = 0;
+                if (WorldElement.TYPE_FISH === WorldElement.typeOf(currentElement)) {
+                    noFish++;
+                    this.doFish(currentElement, x, y);
+                } else if (WorldElement.TYPE_SHARK === WorldElement.typeOf(currentElement)) {
+                    noShark++;
+                    this.doShark(currentElement, x, y);
+                }
+            }
+        }
 
-    x
-
-<
-    theWorld
-->
-    width;
-    x
-++) {
-    for(y = 0;
-
-    y
-
-<
-    theWorld
-->
-    height;
-    y
-++) {
-    currentElement = theWorld->canvas[x + ((theWorld->width) * y)];
-
-    if(isDirty
-
-(&
-    currentElement
-)) {
-    continue;
-}
-if ((currentElement & 3) == tFish) {
-    noFish++;
-    doFish(currentElement, theWorld, x, y);
-} else if ((currentElement & 3) == tShark) {
-    noShark++;
-    doShark(currentElement, theWorld, x, y);
-}
-}
-}
-
-return (noShark != 0) && (noFish != 0);
-}
-
+        return (noShark !== 0) && (noFish !== 0);
+    }
 }
 
 module.exports = World;
