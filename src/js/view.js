@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     var init = () => {
 
-        var width = document.body.clientWidth;
-        var height = document.body.clientHeight;
+        var width = Math.floor(document.body.clientWidth * 0.5);
+        var height = Math.floor(document.body.clientHeight * 0.5);
         var fishStartCount = 1000;
         var fishReproductionTicks = 50;
         var fishEnergy = 10000;
