@@ -1,6 +1,6 @@
 var WorldElement = require('./WorldElement')
 
-class WorldRenderer {
+class WorldRendererSync {
 
     imageData = null;
     oldType = null;
@@ -63,10 +63,6 @@ class WorldRenderer {
         return renderedElements;
     };
 
-    renderAsync = (world) => {
-
-
-    };
 
     render = (world, canvas, ctx) => {
         // ctx.fillStyle = 'rgba(0,0, 0, 1)';
@@ -76,7 +72,6 @@ class WorldRenderer {
         if (!this.imageData || this.imageData.data.length !== world.length * 4) {
             this.init(world, canvas, ctx);
         }
-
 
         // renderedElements += this.renderSync(world);
         renderedElements += this.renderSync(world);
@@ -89,4 +84,4 @@ class WorldRenderer {
     }
 }
 
-module.exports = WorldRenderer;
+module.exports = WorldRendererSync;

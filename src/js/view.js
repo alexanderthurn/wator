@@ -1,6 +1,15 @@
 var helper = require('./helper.js')
 var World = require('./World.js')
-var WorldRenderer = require('./WorldRenderer.js')
+var WorldRendererSync = require('./WorldRendererSync.js')
+var WorldRendererAsync = require('./WorldRendererAsync.js')
+
+const UPDATE_MODE_SINGLETHREAD = 0;
+const UPDATE_MODE_INTERVANL = 1;
+const UPDATE_MODE_WEBWORKER = 2;
+
+
+const RENDER_MODE_SYNC = 0;
+const RENDER_MODE_ASYNC = 1;
 
 /* start as soon as things are set up */
 document.addEventListener("DOMContentLoaded", function (event) {
@@ -9,12 +18,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var ctx = canvas.getContext("2d")
     var time;
     var worldRenderer, world;
-
+    var updateMode = UPDATE_MODE_INTERVANL;
+    var renderMode = RENDER_MODE_SYNC;
+    var scaleFactor = 0.5;
 
     var init = () => {
 
-        var width = Math.floor(document.body.clientWidth * 0.25);
-        var height = Math.floor(document.body.clientHeight * 0.25);
+        var width = Math.floor(document.body.clientWidth * scaleFactor);
+        var height = Math.floor(document.body.clientHeight * scaleFactor);
         var fishStartCount = 1000;
         var fishReproductionTicks = 50;
         var fishEnergy = 10000;
@@ -27,16 +38,19 @@ document.addEventListener("DOMContentLoaded", function (event) {
         canvas.height = height;
         world.init()
 
-
-        worldRenderer = new WorldRenderer();
+        if (renderMode === RENDER_MODE_SYNC) {
+            worldRenderer = new WorldRendererSync();
+        } else if (renderMode === RENDER_MODE_ASYNC) {
+            worldRenderer = new WorldRendererAsync();
+        }
 
         console.log('init done', width, height, world)
-    }
+    };
 
     // render canvas
     var updateCanvas = function (options) {
         worldRenderer.render(world, canvas, ctx)
-    }
+    };
 
     var updateCanvasRegular = function () {
 
@@ -51,15 +65,25 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
         time = now;
 
-        world.doWorldTick()
+        if (updateMode === UPDATE_MODE_SINGLETHREAD) {
+            world.doWorldTick()
+        }
+
         updateCanvas({dtFactor: dtFactor})
         window.requestAnimationFrame(updateCanvasRegular)
 
-    }
+    };
+
+    var updateWorldRegular = function () {
+        if (updateMode === UPDATE_MODE_INTERVANL) {
+            setInterval(world.doWorldTick, 30)
+        }
+    };
 
 
     init();
     updateCanvasRegular();
+    updateWorldRegular();
 
     window.onresize = function (event) {
         init();

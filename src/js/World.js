@@ -189,6 +189,7 @@ class World {
     }
 
 
+    
     doWorldTick = () => {
 
         var x, y;
