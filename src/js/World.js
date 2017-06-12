@@ -2,16 +2,16 @@ var WorldElement = require('./WorldElement')
 
 class World {
 
-    constructor(width, height, fishStartCount, fishReproductionTicks, fishEnergy, sharkStartCount, sharkReproductionTicks, sharkEnergy) {
-        this.width = width;
-        this.height = height;
+    constructor(options) {
+        this.width = options.width;
+        this.height = options.height;
         this.length = this.width * this.height;
-        this.fishStartCount = fishStartCount;
-        this.fishReproductionTicks = fishReproductionTicks;
-        this.fishEnergy = fishEnergy;
-        this.sharkStartCount = sharkStartCount;
-        this.sharkReproductionTicks = sharkReproductionTicks;
-        this.sharkEnergy = sharkEnergy;
+        this.fishStartCount = options.fishStartCount;
+        this.fishReproductionTicks = options.fishReproductionTicks;
+        this.fishEnergy = options.fishEnergy;
+        this.sharkStartCount = options.sharkStartCount;
+        this.sharkReproductionTicks = options.sharkReproductionTicks;
+        this.sharkEnergy = options.sharkEnergy;
         this.data = null;
         this.resIndices = new Array(8);
         this.noTicks = 0;
@@ -57,6 +57,12 @@ class World {
     };
 
 
+    getData = () => {
+        return this.data;
+    };
+    setData = (data) => {
+        this.data = data;
+    };
     getIndexAtPosition = (x, y) => {
         if (x < 0) {
             x += this.width;
@@ -189,7 +195,6 @@ class World {
     }
 
 
-    
     doWorldTick = () => {
 
         var x, y;

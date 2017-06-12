@@ -1,10 +1,13 @@
 var helper = require('./helper.js')
 var World = require('./World.js')
+
+var WorldWebWorker = require('worker-loader!./WorldWebWorker.js')
+
 var WorldRendererSync = require('./WorldRendererSync.js')
 var WorldRendererAsync = require('./WorldRendererAsync.js')
 
 const UPDATE_MODE_SINGLETHREAD = 0;
-const UPDATE_MODE_INTERVANL = 1;
+const UPDATE_MODE_INTERVAL = 1;
 const UPDATE_MODE_WEBWORKER = 2;
 
 
@@ -14,28 +17,77 @@ const RENDER_MODE_ASYNC = 1;
 /* start as soon as things are set up */
 document.addEventListener("DOMContentLoaded", function (event) {
 
+    var showText = (text) => {
+        elemDescription.innerHTML = text;
+    }
+    var showFPS = (text) => {
+        elemFPS.innerHTML = text;
+    }
+
+    var dt;
     var canvas = document.getElementById('canvas')
     var ctx = canvas.getContext("2d")
     var time;
     var worldRenderer, world;
-    var updateMode = UPDATE_MODE_INTERVANL;
+    var updateMode = UPDATE_MODE_SINGLETHREAD;
     var renderMode = RENDER_MODE_SYNC;
-    var scaleFactor = 0.5;
+    var worldWebWorker;
+    var elemDescription = document.getElementById('description');
+    var elemFPS = document.getElementById('fps');
+
+    var urlParam = window.location.search && window.location.search.length > 1 && parseInt(window.location.search.substring(1)) || 0;
+    var urlMode = urlParam % 3;
+    var scaleFactor = urlParam > 2 ? 1.0 : 0.5;
+    if (scaleFactor < 0.99) {
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+    }
+
+    if (urlMode === 2) {
+        updateMode = UPDATE_MODE_WEBWORKER;
+        showText(urlParam + ' WEBWORKER ' + scaleFactor.toFixed(1));
+
+    } else if (urlMode === 1) {
+        updateMode = UPDATE_MODE_INTERVAL;
+        showText(urlParam + ' INTERVAL ' + scaleFactor.toFixed(1));
+    } else {
+        updateMode = UPDATE_MODE_SINGLETHREAD;
+        showText(urlParam + ' SINGLETHREAD ' + scaleFactor.toFixed(1));
+    }
+
+
+    canvas.onclick = () => {
+        window.location.search = '?' + ((urlParam + 1) % 6);
+    }
+
+
+    if (!window.requestAnimationFrame) {
+        helper.injectRequestAnimationFrame();
+    }
+    if (updateMode === UPDATE_MODE_WEBWORKER) {
+        if (typeof(Worker) !== "undefined") {
+            worldWebWorker = new WorldWebWorker();
+        } else {
+            updateMode = UPDATE_MODE_SINGLETHREAD;
+        }
+
+    }
+
 
     var init = () => {
 
-        var width = Math.floor(document.body.clientWidth * scaleFactor);
-        var height = Math.floor(document.body.clientHeight * scaleFactor);
-        var fishStartCount = 1000;
-        var fishReproductionTicks = 50;
-        var fishEnergy = 10000;
-        var sharkStartCount = 50;
-        var sharkReproductionTicks = 10;
-        var sharkEnergy = 20;
+        var options = {
+            width: Math.floor(document.body.clientWidth * scaleFactor),
+            height: Math.floor(document.body.clientHeight * scaleFactor),
+            fishStartCount: 1000,
+            fishReproductionTicks: 50,
+            fishEnergy: 10000,
+            sharkStartCount: 50,
+            sharkReproductionTicks: 10,
+            sharkEnergy: 20
+        }
 
-        world = new World(width, height, fishStartCount, fishReproductionTicks, fishEnergy, sharkStartCount, sharkReproductionTicks, sharkEnergy);
-        canvas.width = width;
-        canvas.height = height;
+        world = new World(options);
         world.init()
 
         if (renderMode === RENDER_MODE_SYNC) {
@@ -44,7 +96,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
             worldRenderer = new WorldRendererAsync();
         }
 
-        console.log('init done', width, height, world)
+        if (updateMode === UPDATE_MODE_WEBWORKER) {
+            worldWebWorker.postMessage(options);
+        }
+
+
+        canvas.width = options.width;
+        canvas.height = options.height;
+        console.log('init done', urlMode, updateMode, renderMode, options)
     };
 
     // render canvas
@@ -54,8 +113,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     var updateCanvasRegular = function () {
 
-        var now = new Date().getTime(),
-            dt = now - (time || now);
+        var now = new Date().getTime();
+        dt = now - (time || now);
 
         var dtFactor = dt / 30.0;
         if (dtFactor < 0.001) {
@@ -75,15 +134,27 @@ document.addEventListener("DOMContentLoaded", function (event) {
     };
 
     var updateWorldRegular = function () {
-        if (updateMode === UPDATE_MODE_INTERVANL) {
-            setInterval(world.doWorldTick, 30)
+        if (updateMode === UPDATE_MODE_INTERVAL) {
+            setInterval(() => {
+                world.doWorldTick();
+            }, 30)
+        } else if (updateMode === UPDATE_MODE_WEBWORKER) {
+            worldWebWorker.addEventListener('message', function (e) {
+                world.setData(e.data);
+            }, false);
         }
     };
 
+    var uppdateFPSRegular = function () {
+        setInterval(() => {
+            showFPS(Math.floor(1000.0 / dt))
+        }, 1000);
+    };
 
     init();
     updateCanvasRegular();
     updateWorldRegular();
+    uppdateFPSRegular();
 
     window.onresize = function (event) {
         init();
