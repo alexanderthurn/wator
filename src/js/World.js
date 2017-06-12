@@ -78,7 +78,7 @@ class World {
     }
 
     setValueAtIndex = (index, v) => {
-        this.data[this.getIndexAtPosition(x, y)] = v;
+        this.data[index] = v;
     }
 
     getValueAtPosition = (x, y) => {
@@ -111,15 +111,14 @@ class World {
                 if (xt > mx) xt = 0;
                 if (yt > my) yt = 0;
                 idx = xt + (this.width * yt);
-                testElement = this.canvas[idx];
-                if ((testElement & 3) == destType) {
-                    resIndices[resCount++] = idx;
+                testElement = this.data[idx];
+                if (WorldElement.typeOf(testElement) === destType) {
+                    this.resIndices[resCount++] = idx;
                 }
             }
         }
         if (resCount > 0) {
-            result = resIndices[Math.floor(Math.random() * resCount)];
-            return result;
+            return this.resIndices[Math.floor(Math.random() * resCount)];
         }
         return -1;
     }
@@ -134,11 +133,11 @@ class World {
         breedC = WorldElement.breedCountdownOf(theFish) - 1;
 
         if (breedC <= 0) {
-            breedC = reproduceCFish;
-            replacementElement = WorldElement.create(WorldElement.TYPE_FISH, 255, Math.floor(Math.random() * reproduceCFish)) | 4;
+            breedC = this.fishReproductionTicks;
+            replacementElement = WorldElement.create(WorldElement.TYPE_FISH, 255, Math.floor(Math.random() * this.fishReproductionTicks)) | 4;
         }
 
-        newPos = this.randomNeighborOfType(theWorld, 0, x, y);
+        newPos = this.randomNeighborOfType(WorldElement.TYPE_EMPTY, x, y);
 
         if (newPos > 0) {
             updatedFish = WorldElement.create(WorldElement.TYPE_FISH, 128, breedC);
@@ -164,10 +163,10 @@ class World {
 
         if (breedC <= 0) {
             breedC = this.sharkReproductionTicks;
-            replacementElement = WorldElement.create(WorldElement.TYPE_SHARK, Math.floor(Math.random() * initialEnergyShark), Math.floor(Math.random() * reproduceCShark)) | 4;
+            replacementElement = WorldElement.create(WorldElement.TYPE_SHARK, Math.floor(Math.random() * this.sharkEnergy), Math.floor(Math.random() * this.sharkReproductionTicks)) | 4;
         }
 
-        newPos = randomNeighborOfType(theWorld, WorldElement.TYPE_FISH, x, y);
+        newPos = this.randomNeighborOfType(WorldElement.TYPE_FISH, x, y);
         if (newPos > 0) {
             energy += 2;
             if (energy > 255) {
@@ -180,7 +179,7 @@ class World {
             return;
         }
 
-        newPos = randomNeighborOfType(theWorld, WorldElement.TYPE_EMPTY, x, y);
+        newPos = this.randomNeighborOfType(WorldElement.TYPE_EMPTY, x, y);
         if (newPos > 0) {
             updatedFish = WorldElement.create(WorldElement.TYPE_SHARK, energy, breedC);
             this.setValueAtPosition(x, y, replacementElement)

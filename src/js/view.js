@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     var init = () => {
 
-        var width = Math.floor(document.body.clientWidth * 0.5);
-        var height = Math.floor(document.body.clientHeight * 0.5);
+        var width = Math.floor(document.body.clientWidth * 0.25);
+        var height = Math.floor(document.body.clientHeight * 0.25);
         var fishStartCount = 1000;
         var fishReproductionTicks = 50;
         var fishEnergy = 10000;
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
         time = now;
 
-
+        world.doWorldTick()
         updateCanvas({dtFactor: dtFactor})
         window.requestAnimationFrame(updateCanvasRegular)
 

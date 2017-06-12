@@ -85,7 +85,7 @@ class WorldRenderer {
         //ctx.fillStyle = 'rgba(0,255,255,1)'
         // ctx.fillRect(canvas.width * 0.5, 0, canvas.width, canvas.height)
         ctx.putImageData(this.imageData, 0, 0);
-        console.log('renderedElements', renderedElements)
+        //console.log('renderedElements', renderedElements)
     }
 }
 
