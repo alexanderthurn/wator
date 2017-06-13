@@ -22,6 +22,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
         elemFPS.innerHTML = text;
     }
 
+    var showInfos = () => {
+        if (urlMode === 2) {
+            updateMode = UPDATE_MODE_WEBWORKER;
+            showText(urlParam + ' WEBWORKER ' + scaleFactor.toFixed(1) + (world ? (' ' + world.width + 'x' + world.height) : ''));
+
+        } else if (urlMode === 1) {
+            updateMode = UPDATE_MODE_INTERVAL;
+            showText(urlParam + ' INTERVAL ' + scaleFactor.toFixed(1) + (world ? (' ' + world.width + 'x' + world.height) : ''));
+        } else {
+            updateMode = UPDATE_MODE_SINGLETHREAD;
+            showText(urlParam + ' SINGLETHREAD ' + scaleFactor.toFixed(1) + (world ? (' ' + world.width + 'x' + world.height) : ''));
+        }
+
+    }
     var dt;
     var canvas = document.getElementById('canvas')
     var ctx = canvas.getContext("2d")
@@ -31,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var worldWebWorker;
     var elemDescription = document.getElementById('description');
     var elemFPS = document.getElementById('fps');
+    var world;
 
     var urlParam = window.location.search && window.location.search.length > 1 && parseInt(window.location.search.substring(1)) || 0;
     var urlMode = urlParam % 3;
@@ -40,17 +55,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         canvas.style.height = '100%';
     }
 
-    if (urlMode === 2) {
-        updateMode = UPDATE_MODE_WEBWORKER;
-        showText(urlParam + ' WEBWORKER ' + scaleFactor.toFixed(1));
-
-    } else if (urlMode === 1) {
-        updateMode = UPDATE_MODE_INTERVAL;
-        showText(urlParam + ' INTERVAL ' + scaleFactor.toFixed(1));
-    } else {
-        updateMode = UPDATE_MODE_SINGLETHREAD;
-        showText(urlParam + ' SINGLETHREAD ' + scaleFactor.toFixed(1));
-    }
+    showInfos();
 
 
     canvas.onclick = () => {
@@ -63,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     }
     if (updateMode === UPDATE_MODE_WEBWORKER) {
         if (typeof(Worker) !== "undefined") {
-            worldWebWorker = new WorldWebWorker();
+            console.log('webworker supported')
         } else {
             updateMode = UPDATE_MODE_SINGLETHREAD;
         }
@@ -76,10 +81,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var options = {
             width: Math.floor(document.body.clientWidth * scaleFactor),
             height: Math.floor(document.body.clientHeight * scaleFactor),
-            fishStartCount: 1000,
+            fishStartCount: 1000 * 4,
             fishReproductionTicks: 50,
             fishEnergy: 10000,
-            sharkStartCount: 50,
+            sharkStartCount: 50 * 4,
             sharkReproductionTicks: 10,
             sharkEnergy: 20
         }
@@ -95,15 +100,24 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
 
         if (updateMode === UPDATE_MODE_WEBWORKER) {
-            setTimeout(() => {
-                worldWebWorker.postMessage({options: options, data: data}, [data.buffer]);
-            }, 10)
+            if (worldWebWorker) {
+                worldWebWorker.terminate();
+            }
+            worldWebWorker = new WorldWebWorker();
+            worldWebWorker.postMessage({options: options, data: data}, [data.buffer]);
+            worldWebWorker.addEventListener('message', function (e) {
+                world.setData(e.data);
+                worldRenderer.renderImage(world, canvas, ctx);
+                worldWebWorker.postMessage(e.data, [e.data.buffer]);
+            }, false);
         }
 
 
         canvas.width = options.width;
         canvas.height = options.height;
         console.log('init done', urlMode, updateMode, options)
+
+        showInfos();
     };
 
     // render canvas
@@ -138,12 +152,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
             setInterval(() => {
                 world.doWorldTick();
             }, 30)
-        } else if (updateMode === UPDATE_MODE_WEBWORKER) {
-            worldWebWorker.addEventListener('message', function (e) {
-                world.setData(e.data);
-                worldRenderer.renderImage(world, canvas, ctx);
-                worldWebWorker.postMessage(e.data, [e.data.buffer]);
-            }, false);
         }
     };
 

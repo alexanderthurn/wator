@@ -2,15 +2,21 @@ var WorldElement = require('./WorldElement')
 
 class WorldRendererSync {
 
-    imageData = null;
-    oldType = null;
+    imageData1 = null;
+    imageData2 = null;
+    oldTypeData1 = null;
+    oldTypeData2 = null;
 
     init = (world, canvas, ctx) => {
-        this.imageData = ctx.createImageData(world.width, world.height);
-        this.oldType = new Array(world.width * world.height);
-        for (var i = 0; i < this.imageData.data.length; i += 4) {
-            this.renderEmpty(this.imageData.data, i);
-            this.oldType[i] = 0;
+        this.imageData1 = ctx.createImageData(world.width, world.height);
+        this.imageData2 = ctx.createImageData(world.width, world.height);
+        this.oldTypeData1 = new Array(world.width * world.height);
+        this.oldTypeData2 = new Array(world.width * world.height);
+        for (var i = 0; i < this.imageData1.data.length; i += 4) {
+            this.renderEmpty(this.imageData1.data, i);
+            this.renderEmpty(this.imageData2.data, i);
+            this.oldTypeData1[i] = 0;
+            this.oldTypeData2[i] = 0;
         }
 
     };
@@ -36,7 +42,7 @@ class WorldRendererSync {
     };
 
     renderImage = (world, canvas, ctx) => {
-        if (!this.imageData || this.imageData.data.length !== world.length * 4) {
+        if (!this.imageData1 || this.imageData1.data.length !== world.length * 4) {
             this.init(world, canvas, ctx);
         }
 
@@ -45,18 +51,18 @@ class WorldRendererSync {
             let element = world.getValueAtIndexUnsafe(i);
             let elementType = WorldElement.typeOf(element);
 
-            if (elementType !== this.oldType[i]) {
-                this.oldType[i] = elementType;
+            if (elementType !== this.oldTypeData1[i]) {
+                this.oldTypeData1[i] = elementType;
                 renderedElements++;
                 switch (elementType) {
                     case WorldElement.TYPE_SHARK:
-                        this.renderShark(this.imageData.data, i * 4);
+                        this.renderShark(this.imageData1.data, i * 4);
                         break;
                     case WorldElement.TYPE_FISH:
-                        this.renderFish(this.imageData.data, i * 4);
+                        this.renderFish(this.imageData1.data, i * 4);
                         break;
                     default:
-                        this.renderEmpty(this.imageData.data, i * 4);
+                        this.renderEmpty(this.imageData1.data, i * 4);
                         break;
                 }
             }
@@ -64,13 +70,24 @@ class WorldRendererSync {
 
         }
 
+        var temp = this.imageData2;
+        this.imageData2 = this.imageData1;
+        this.imageData1 = temp;
+
+        temp = this.oldTypeData2;
+        this.oldTypeData2 = this.oldTypeData1;
+        this.oldTypeData1 = temp;
+
         return renderedElements;
     };
 
 
     render = (world, canvas, ctx) => {
-        if (this.imageData) {
-            ctx.putImageData(this.imageData, 0, 0);
+        if (this.imageData2) {
+            ctx.putImageData(this.imageData2, 0, 0);
+        } else {
+            ctx.fillStyle = 'rgba(0,0, 0, 1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
         }
     }
 }

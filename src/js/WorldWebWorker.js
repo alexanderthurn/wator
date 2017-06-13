@@ -12,7 +12,10 @@ self.addEventListener('message', function (e) {
     }
 
 
-    world.doWorldTick();
+    for (var i = 0; i < 10; i++) {
+
+        world.doWorldTick();
+    }
     var data = world.getData();
     self.postMessage(data, [data.buffer]);
 }, false);
