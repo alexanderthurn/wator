@@ -18,7 +18,7 @@ class World {
     };
 
     init = () => {
-        this.data = new Array(this.width * this.height);
+        this.data = new Uint32Array(this.width * this.height);
         for (var x = 0; x < this.width; x++) {
             for (var y = 0; y < this.height; y++) {
                 this.setValueAtPosition(x, y, 0)

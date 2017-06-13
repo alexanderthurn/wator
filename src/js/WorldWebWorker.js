@@ -1,21 +1,21 @@
 var World = require('./World.js')
-
 var world;
 
+
 self.addEventListener('message', function (e) {
-    world = null;
-    world = new World(e.data);
-    world.init()
 
-}, false);
-
-setInterval(function () {
-    if (world) {
-        world.doWorldTick();
-        self.postMessage(world.getData());
+    if (e.data.options) {
+        world = new World(e.data.options);
+        world.setData(e.data.data);
+    } else {
+        world.setData(e.data);
     }
-}, 30);
-    
+
+
+    world.doWorldTick();
+    var data = world.getData();
+    self.postMessage(data, [data.buffer]);
+}, false);
 
 
 

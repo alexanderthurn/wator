@@ -5,14 +5,12 @@ var WorldWebWorker = require('worker-loader!./WorldWebWorker.js')
 
 var WorldRendererSync = require('./WorldRendererSync.js')
 var WorldRendererAsync = require('./WorldRendererAsync.js')
+var WorldRendererWebWorker = require('./WorldRendererWebWorker.js')
 
 const UPDATE_MODE_SINGLETHREAD = 0;
 const UPDATE_MODE_INTERVAL = 1;
 const UPDATE_MODE_WEBWORKER = 2;
 
-
-const RENDER_MODE_SYNC = 0;
-const RENDER_MODE_ASYNC = 1;
 
 /* start as soon as things are set up */
 document.addEventListener("DOMContentLoaded", function (event) {
@@ -30,7 +28,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var time;
     var worldRenderer, world;
     var updateMode = UPDATE_MODE_SINGLETHREAD;
-    var renderMode = RENDER_MODE_SYNC;
     var worldWebWorker;
     var elemDescription = document.getElementById('description');
     var elemFPS = document.getElementById('fps');
@@ -89,21 +86,24 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
         world = new World(options);
         world.init()
+        var data = world.getData();
 
-        if (renderMode === RENDER_MODE_SYNC) {
+        if (updateMode !== UPDATE_MODE_WEBWORKER) {
             worldRenderer = new WorldRendererSync();
-        } else if (renderMode === RENDER_MODE_ASYNC) {
-            worldRenderer = new WorldRendererAsync();
+        } else {
+            worldRenderer = new WorldRendererWebWorker();
         }
 
         if (updateMode === UPDATE_MODE_WEBWORKER) {
-            worldWebWorker.postMessage(options);
+            setTimeout(() => {
+                worldWebWorker.postMessage({options: options, data: data}, [data.buffer]);
+            }, 10)
         }
 
 
         canvas.width = options.width;
         canvas.height = options.height;
-        console.log('init done', urlMode, updateMode, renderMode, options)
+        console.log('init done', urlMode, updateMode, options)
     };
 
     // render canvas
@@ -141,6 +141,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         } else if (updateMode === UPDATE_MODE_WEBWORKER) {
             worldWebWorker.addEventListener('message', function (e) {
                 world.setData(e.data);
+                worldRenderer.renderImage(world, canvas, ctx);
+                worldWebWorker.postMessage(e.data, [e.data.buffer]);
             }, false);
         }
     };
