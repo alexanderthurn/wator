@@ -81,10 +81,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var options = {
             width: Math.floor(document.body.clientWidth * scaleFactor),
             height: Math.floor(document.body.clientHeight * scaleFactor),
-            fishStartCount: 1000 * 4,
+            fishStartCount: 1000,
             fishReproductionTicks: 50,
             fishEnergy: 10000,
-            sharkStartCount: 50 * 4,
+            sharkStartCount: 50,
             sharkReproductionTicks: 10,
             sharkEnergy: 20
         }

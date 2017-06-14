@@ -11,11 +11,9 @@ self.addEventListener('message', function (e) {
         world.setData(e.data);
     }
 
-
-    for (var i = 0; i < 10; i++) {
-
-        world.doWorldTick();
-    }
+    
+    world.doWorldTick();
+    
     var data = world.getData();
     self.postMessage(data, [data.buffer]);
 }, false);
