@@ -110,13 +110,43 @@ function injectRequestAnimationFrame() {
     }());
 }
 
+function getQueryParams(qs) {
+    qs = qs.split('+').join(' ');
+
+    var params = {},
+        tokens,
+        re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs)) {
+        params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
+}
+
+function getSearchParam(name) {
+    return getQueryParams(window.location.search)[name];
+}
+
+function serialize(obj) {
+    var str = [];
+    for (var p in obj)
+        if (obj.hasOwnProperty(p)) {
+            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+        }
+    return str.join("&");
+}
+
 module.exports = {
     getCursorPosition: getCursorPosition,
     setRequestAnmationFrameWithFallback: setRequestAnmationFrameWithFallback,
     getAverageValue: getAverageValue,
     setUserMediaWithFallback: setUserMediaWithFallback,
     setAudioContextWithFallback: setAudioContextWithFallback,
-    injectRequestAnimationFrame: injectRequestAnimationFrame
+    injectRequestAnimationFrame: injectRequestAnimationFrame,
+    getQueryParams: getQueryParams,
+    serialize: serialize,
+    getSearchParam: getSearchParam
 }
 
 
