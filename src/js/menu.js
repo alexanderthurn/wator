@@ -1,19 +1,24 @@
 var helper = require('./helper')
 
 
-document.getElementById('menuScaleFactor').getElementsByTagName('button')
-
-
 document.addEventListener("DOMContentLoaded", function (event) {
 
 
+    var buttonMenu = document.getElementById('buttonMenu');
+    var menu = document.getElementById('menu');
+    buttonMenu.onclick = () => {
+        if (menu.style.visibility === 'hidden') {
+            menu.style.visibility = 'visible';
+        } else {
+            menu.style.visibility = 'hidden';
+        }
+    }
+
     var setInputButtonLinks = function (inputElems, buttonElems, menuEntries) {
         if (inputElems.length > 0) {
-            console.log('inputElems', buttonElems)
             for (let i = 0; i < buttonElems.length; i++) {
                 buttonElems[i].onclick = function () {
                     inputElems[0].value = this.innerHTML
-                    console.log('click', this.innerHTML)
                     updateInputAndButtons(inputElems, buttonElems);
                     collectQueryInfosAndLoadPage(inputElems, buttonElems, menuEntries);
                 };
@@ -54,7 +59,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
         }
 
-        console.log('queryOptions', queryOptions, helper.serialize(queryOptions))
 
         window.location.search = helper.serialize(queryOptions);
     }
@@ -67,7 +71,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 var attributeName = inputElemsInner[0].getAttribute('data-param');
 
                 var value = helper.getSearchParam(attributeName);
-                console.log(attributeName, value)
                 if (value !== undefined) {
                     inputElemsInner[0].value = value;
                 }
@@ -80,7 +83,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var menuEntries = document.getElementsByClassName('menuEntry');
     for (var j = 0; j < menuEntries.length; j++) {
         var entry = menuEntries[j];
-        console.log('click')
         var inputElems = entry.getElementsByTagName('input');
         var buttonElems = entry.getElementsByTagName('button');
         setInputInitialState(inputElems, buttonElems, menuEntries);

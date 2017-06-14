@@ -10,21 +10,24 @@
 <style>
     .menu {
         position: absolute;
-        top: 10%;
-        left: 10%;
-        right: 10%;
-        background: #fff;
+        top: 0%;
+        left: 5%;
+        right: 5%;
+        background: rgba(255, 255, 255, 1.0);
     }
 
     .menuentry {
         margin: 5px;
         padding: 5px;
         float: left;
-        width: 45%;
 
     }
 
     .menuentry button {
+    }
+
+    .menuentry input {
+        display: block;
     }
 
     body {
@@ -35,6 +38,29 @@
         background-color: black;
         color: white;
     }
+
+    @media (max-width: 600px) {
+        .menuentry {
+            width: 100%;
+            margin: 0px;
+        }
+
+        .menu {
+            top: 30px
+        }
+
+        .menuentry input {
+        }
+
+        .menuentry button {
+        }
+    }
+
+    #buttonMenu {
+        min-width: 100px;
+        min-height: 40px;
+        text-align: right;
+    }
 </style>
 <body>
 
@@ -43,42 +69,39 @@
 
 <div style="position: absolute; bottom: 0; left: 0;color: white" id="description">ASd</div>
 <div style="position: absolute; bottom: 0; right: 0;color: white" id="fps">FPS</div>
-<div style="position: absolute; top: 0; right: 0;color: white" id="fps">
-    <button>menu</button>
-</div>
 
-<div class="menu">
-    <h1>Fish Maker
-        <button>Close menu</button>
-    </h1>
 
+<div class="menu" id="menu">
     <div class="menuentry" id="menuScaleFactor">
         <span>ScaleFactor</span>
         <input type="text" value="0.25" data-param="scaleFactor"/>
-        <button>0.25</button>
+        <button>0.1</button>
+        <button>0.2</button>
         <button>0.5</button>
+        <button>0.8</button>
         <button>1</button>
     </div>
     <div class="menuentry">
         <span>Calculation method</span>
         <input type="text" value="UI" data-param="calcMethod"/>
         <button>UI</button>
-        <button>Interval</button>
-        <button>Webworker</button>
+        <button>INTERVAL</button>
+        <button>WEBWORKER</button>
     </div>
-    <div class="menuentry">
+    <!--<div class="menuentry">
         <span>Presets</span>
         <button>Stephan 1</button>
         <button>Stephan 2</button>
         <button>Empty</button>
-    </div>
+    </div>-->
 
     <div class="menuentry">
         <span>Fish Start Count</span>
         <input type="text" value="1000" data-param="fishStartCount"/>
         <button>0</button>
+        <button>500</button>
         <button>1000</button>
-        <button>2000</button>
+        <button>5000</button>
     </div>
     <div class="menuentry">
         <span>Fish reproduction ticks</span>
@@ -86,6 +109,7 @@
         <button>10</button>
         <button>50</button>
         <button>100</button>
+        <button>500</button>
     </div>
 
     <div class="menuentry">
@@ -94,12 +118,14 @@
         <button>0</button>
         <button>50</button>
         <button>100</button>
+        <button>1000</button>
     </div>
     <div class="menuentry">
         <span>Shark energy</span>
         <input type="text" value="20" data-param="sharkEnergy"/>
         <button>10</button>
         <button>20</button>
+        <button>21</button>
         <button>50</button>
     </div>
     <div class="menuentry">
@@ -108,10 +134,13 @@
         <button>5</button>
         <button>10</button>
         <button>20</button>
+        <button>50</button>
     </div>
 
 </div>
-
+<div style="position: absolute; top: 0; right: 0;color: white" id="fps">
+    <div id="buttonMenu">menu</div>
+</div>
 </body>
 
 </html>

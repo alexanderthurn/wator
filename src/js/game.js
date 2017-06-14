@@ -23,33 +23,36 @@ document.addEventListener("DOMContentLoaded", function (event) {
     }
 
     var showInfos = () => {
-        if (urlMode === 2) {
-            updateMode = UPDATE_MODE_WEBWORKER;
-            showText(urlParam + ' WEBWORKER ' + scaleFactor.toFixed(1) + (world ? (' ' + world.width + 'x' + world.height) : ''));
-
-        } else if (urlMode === 1) {
-            updateMode = UPDATE_MODE_INTERVAL;
-            showText(urlParam + ' INTERVAL ' + scaleFactor.toFixed(1) + (world ? (' ' + world.width + 'x' + world.height) : ''));
-        } else {
-            updateMode = UPDATE_MODE_SINGLETHREAD;
-            showText(urlParam + ' SINGLETHREAD ' + scaleFactor.toFixed(1) + (world ? (' ' + world.width + 'x' + world.height) : ''));
-        }
-
+        showText(urlParam + ' ' + scaleFactor.toFixed(1) + (world ? (' ' + world.width + 'x' + world.height) : ''));
     }
     var dt;
     var canvas = document.getElementById('canvas')
     var ctx = canvas.getContext("2d")
     var time;
-    var worldRenderer, world;
+    var worldRenderer;
     var updateMode = UPDATE_MODE_SINGLETHREAD;
     var worldWebWorker;
     var elemDescription = document.getElementById('description');
     var elemFPS = document.getElementById('fps');
     var world;
 
-    var urlParam = window.location.search && window.location.search.length > 1 && parseInt(window.location.search.substring(1)) || 0;
-    var urlMode = urlParam % 3;
-    var scaleFactor = urlParam > 2 ? 1.0 : 0.5;
+    var urlParam = helper.getSearchParam('calcMethod') || 'UI';
+    var urlMode;
+
+    switch (urlParam) {
+        case 'UI':
+            urlMode = UPDATE_MODE_SINGLETHREAD;
+            break;
+        case 'INTERVAL':
+            urlMode = UPDATE_MODE_INTERVAL;
+            break;
+        case 'WEBWORKER':
+            urlMode = UPDATE_MODE_WEBWORKER;
+            break;
+    }
+    var scaleFactor = parseFloat(helper.getSearchParam('scaleFactor') || 0.5);
+
+
     if (scaleFactor < 0.99) {
         canvas.style.width = '100%';
         canvas.style.height = '100%';
@@ -57,11 +60,19 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     showInfos();
 
+    /* var getMousePos = function(canvas, evt) {
+     var rect = canvas.getBoundingClientRect();
+     return {
+     x: evt.clientX - rect.left,
+     y: evt.clientY - rect.top
+     };
+     }
+     canvas.addEventListener('mousemove', function(evt) {
+     var mousePos = getMousePos(canvas, evt);
 
-    canvas.onclick = () => {
-        window.location.search = '?' + ((urlParam + 1) % 6);
-    }
 
+     }, false);
+     */
 
     if (!window.requestAnimationFrame) {
         helper.injectRequestAnimationFrame();
@@ -81,13 +92,15 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var options = {
             width: Math.floor(document.body.clientWidth * scaleFactor),
             height: Math.floor(document.body.clientHeight * scaleFactor),
-            fishStartCount: 1000,
-            fishReproductionTicks: 50,
+            fishStartCount: parseInt(helper.getSearchParam('fishStartCount') || 1000),
+            fishReproductionTicks: parseInt(helper.getSearchParam('fishReproductionTicks') || 50),
             fishEnergy: 10000,
-            sharkStartCount: 50,
-            sharkReproductionTicks: 10,
-            sharkEnergy: 20
+            sharkStartCount: parseInt(helper.getSearchParam('sharkStartCount') || 50),
+            sharkReproductionTicks: parseInt(helper.getSearchParam('sharkReproductionTicks') || 10),
+            sharkEnergy: parseInt(helper.getSearchParam('sharkEnergy') || 20)
         }
+
+        console.log(options)
 
         world = new World(options);
         world.init()
