@@ -1,6 +1,7 @@
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 var WebpackCleanupPlugin = require('webpack-cleanup-plugin');
 var webpack = require('webpack');
 var intlJSON = require('./src/res/en.json');
@@ -81,6 +82,7 @@ if (isProduction) {
 
 
 config.plugins.push(
+    new CopyWebpackPlugin([{from: 'src/glsl', to: 'glsl'}]),
     new webpack.DefinePlugin(intlJSON),
     new HtmlWebpackPlugin({
         filename: 'index.html',
