@@ -52,6 +52,14 @@ class World {
 
     };
 
+    fillWithFishes = (fishPositionArray) => {
+        while (fishPositionArray.length > 0) {
+            var pos = fishPositionArray.pop();
+            var elem = WorldElement.create(WorldElement.TYPE_FISH, this.fishEnergy, Math.floor(Math.random() * this.fishReproductionTicks) | 4)
+            this.setValueAtPosition(pos.x, pos.y, elem)
+        }
+
+    };
     isFree = (x, y) => {
         return this.getIndexAtPosition(x, y) > 0;
     };

@@ -1,5 +1,6 @@
 var helper = require('./helper.js')
 var World = require('./World.js')
+var WorldElement = require('./WorldElement.js')
 
 var WorldWebWorker = require('worker-loader!./WorldWebWorker.js')
 
@@ -35,19 +36,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var elemDescription = document.getElementById('description');
     var elemFPS = document.getElementById('fps');
     var world;
+    var brushSizeHalf = Math.ceil((helper.getSearchParam('brushSize') || 5) * 0.5);
+    var fishesPositionsToBePlaced = [];
 
     var urlParam = helper.getSearchParam('calcMethod') || 'UI';
-    var urlMode;
 
     switch (urlParam) {
         case 'UI':
-            urlMode = UPDATE_MODE_SINGLETHREAD;
+            updateMode = UPDATE_MODE_SINGLETHREAD;
             break;
         case 'INTERVAL':
-            urlMode = UPDATE_MODE_INTERVAL;
+            updateMode = UPDATE_MODE_INTERVAL;
             break;
         case 'WEBWORKER':
-            urlMode = UPDATE_MODE_WEBWORKER;
+            updateMode = UPDATE_MODE_WEBWORKER;
             break;
     }
     var scaleFactor = parseFloat(helper.getSearchParam('scaleFactor') || 0.5);
@@ -60,19 +62,26 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     showInfos();
 
-    /* var getMousePos = function(canvas, evt) {
-     var rect = canvas.getBoundingClientRect();
-     return {
-     x: evt.clientX - rect.left,
-     y: evt.clientY - rect.top
-     };
-     }
-     canvas.addEventListener('mousemove', function(evt) {
-     var mousePos = getMousePos(canvas, evt);
+    var getMousePos = function (canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: Math.floor((evt.clientX - rect.left) * scaleFactor),
+            y: Math.floor((evt.clientY - rect.top) * scaleFactor)
+        };
+    }
+    canvas.addEventListener('mousemove', function (evt) {
+        var mousePos = getMousePos(canvas, evt);
+        for (var x = mousePos.x - brushSizeHalf; x < mousePos.x + brushSizeHalf; x++) {
+            for (var y = mousePos.y - brushSizeHalf; y < mousePos.y + brushSizeHalf; y++) {
+                fishesPositionsToBePlaced.push({
+                    x: x,
+                    y: y,
+                    type: evt.buttons ? WorldElement.TYPE_SHARK : WorldElement.TYPE_FISH
+                });
+            }
+        }
+    }, false);
 
-
-     }, false);
-     */
 
     if (!window.requestAnimationFrame) {
         helper.injectRequestAnimationFrame();
@@ -120,6 +129,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             worldWebWorker.postMessage({options: options, data: data}, [data.buffer]);
             worldWebWorker.addEventListener('message', function (e) {
                 world.setData(e.data);
+                world.fillWithFishes(fishesPositionsToBePlaced);
                 worldRenderer.renderImage(world, canvas, ctx);
                 worldWebWorker.postMessage(e.data, [e.data.buffer]);
             }, false);
@@ -128,7 +138,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
         canvas.width = options.width;
         canvas.height = options.height;
-        console.log('init done', urlMode, updateMode, options)
+        console.log('init done', updateMode, options)
 
         showInfos();
     };
@@ -152,6 +162,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         time = now;
 
         if (updateMode === UPDATE_MODE_SINGLETHREAD) {
+            console.log('fillWithFishes', 'UPDATE_MODE_SINGLETHREAD')
+            world.fillWithFishes(fishesPositionsToBePlaced);
             world.doWorldTick()
         }
 
@@ -163,6 +175,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var updateWorldRegular = function () {
         if (updateMode === UPDATE_MODE_INTERVAL) {
             setInterval(() => {
+                console.log('fillWithFishes', 'UPDATE_MODE_INTERVAL')
+                world.fillWithFishes(fishesPositionsToBePlaced);
                 world.doWorldTick();
             }, 30)
         }

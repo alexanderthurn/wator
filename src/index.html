@@ -8,6 +8,10 @@
 </head>
 
 <style>
+    canvas {
+        cursor: crosshair;
+    }
+
     .menu {
         position: absolute;
         top: 0%;
@@ -39,7 +43,7 @@
         color: white;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 400px) {
         .menuentry {
             width: 100%;
             margin: 0px;
@@ -74,7 +78,7 @@
 <div class="menu" id="menu">
     <div class="menuentry" id="menuScaleFactor">
         <span>ScaleFactor</span>
-        <input type="text" value="0.25" data-param="scaleFactor"/>
+        <input type="text" value="0.2" data-param="scaleFactor"/>
         <button>0.1</button>
         <button>0.2</button>
         <button>0.5</button>
@@ -136,7 +140,14 @@
         <button>20</button>
         <button>50</button>
     </div>
-
+    <div class="menuentry">
+        <span>Brush size</span>
+        <input type="text" value="10" data-param="brushSize"/>
+        <button>2</button>
+        <button>10</button>
+        <button>20</button>
+        <button>30</button>
+    </div>
 </div>
 <div style="position: absolute; top: 0; right: 0;color: white" id="fps">
     <div id="buttonMenu">menu</div>
