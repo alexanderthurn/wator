@@ -5,12 +5,13 @@ var WorldElement = require('./WorldElement.js')
 var WorldWebWorker = require('worker-loader!./WorldWebWorker.js')
 
 var WorldRendererSync = require('./WorldRendererSync.js')
-var WorldRendererAsync = require('./WorldRendererAsync.js')
 var WorldRendererWebWorker = require('./WorldRendererWebWorker.js')
+var WorldRendererShader = require('./WorldRendererShader.js')
 
 const UPDATE_MODE_SINGLETHREAD = 0;
 const UPDATE_MODE_INTERVAL = 1;
 const UPDATE_MODE_WEBWORKER = 2;
+const UPDATE_MODE_SHADER = 3;
 
 
 /* start as soon as things are set up */
@@ -52,6 +53,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
         case 'WEBWORKER':
             updateMode = UPDATE_MODE_WEBWORKER;
             break;
+        case 'SHADER':
+            updateMode = UPDATE_MODE_SHADER;
+            break;
     }
     var scaleFactor = parseFloat(helper.getSearchParam('scaleFactor') || 0.2);
 
@@ -68,14 +72,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         return {
             x: Math.floor((evt.clientX - rect.left) * scaleFactor),
             y: Math.floor((evt.clientY - rect.top) * scaleFactor)
-        };
-    }
-
-    var getTouchPos = function (canvas, touchEvent) {
-        var rect = canvas.getBoundingClientRect();
-        return {
-            x: Math.floor((touchEvent.touches[0].clientX - rect.left) * scaleFactor),
-            y: Math.floor((touchEvent.touches[0].clientY - rect.top) * scaleFactor)
         };
     }
 
@@ -112,15 +108,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     }, false);
 
-    /*
-     canvas.addEventListener('touchmove', (evt) => {
-     var mousePos = getTouchPos(canvas, evt);
-     alert(mousePos.x, mousePos.y)
-     if (evt.buttons > 0) {
-     placeFishes(mousePos, evt.touches.length === 2 ? WorldElement.TYPE_SHARK : (evt.length === 3 ? WorldElement.TYPE_EMPTY : WorldElement.TYPE_FISH), (evt.buttons === 3 ? brushSizeHalf * 8 : brushSizeHalf))
-     }
-     }, false);
-     */
 
     if (!window.requestAnimationFrame) {
         helper.injectRequestAnimationFrame();
@@ -153,10 +140,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
         world.init()
         var data = world.getData();
 
-        if (updateMode !== UPDATE_MODE_WEBWORKER) {
-            worldRenderer = new WorldRendererSync();
+        if (updateMode === UPDATE_MODE_WEBWORKER) {
+            worldRenderer = new WorldRendererWebWorker()
+        } else if (updateMode === UPDATE_MODE_SHADER) {
+            worldRenderer = new WorldRendererShader();
         } else {
-            worldRenderer = new WorldRendererWebWorker();
+            worldRenderer = new WorldRendererSync();
         }
 
         if (updateMode === UPDATE_MODE_WEBWORKER) {
@@ -213,13 +202,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
     };
 
     var updateWorldRegular = function () {
-        if (updateMode === UPDATE_MODE_INTERVAL) {
-            setInterval(() => {
-                world.fillWithFishes(fishesPositionsToBePlaced);
-                world.doWorldTick();
-                updateDTCalc()
-            }, 30)
-        }
+        setInterval(() => {
+            world.fillWithFishes(fishesPositionsToBePlaced);
+            world.doWorldTick();
+            updateDTCalc()
+        }, 30)
     };
 
     var uppdateFPSRegular = function () {
@@ -230,7 +217,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     init();
     updateCanvasRegular();
-    updateWorldRegular();
+    if (updateMode === UPDATE_MODE_INTERVAL) {
+        updateWorldRegular();
+    }
     uppdateFPSRegular();
 
     window.onresize = function (event) {
