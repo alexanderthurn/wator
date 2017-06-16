@@ -1,3 +1,2 @@
-//var view = require('./game.js')
+require('./gol.js')
 require('./menu.js')
-require('./gol.js');

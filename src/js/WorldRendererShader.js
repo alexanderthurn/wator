@@ -1,27 +1,25 @@
 var WorldElement = require('./WorldElement')
+var GOL = require('./gol.js')
 
-class WorldRendererSync {
-
+class WorldRendererShader {
+    gol = null;
 
     init = (world, canvas, ctx) => {
-        this.imageData = ctx.createImageData(world.width, world.height);
+        this.gol = new GOL(canvas).draw().start();
     };
 
 
+    update = () => {
+        gol.step();
+    };
     render = (world, canvas, ctx) => {
-        var renderedElements = 0;
 
-
-        if (!this.imageData || this.imageData.data.length !== world.length * 4) {
+        if (!this.gol) {
             this.init(world, canvas, ctx);
         }
 
-        ctx.putImageData(this.imageData, 0, 0);
-
-
-        ctx.fillStyle = 'rgba(255,0, 0, 0.5)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        this.gol.draw();
     }
 }
 
-module.exports = WorldRendererSync;
+module.exports = WorldRendererShader;

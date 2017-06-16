@@ -238,7 +238,6 @@ GOL.prototype.toggle = function () {
     }
 };
 
-
 /* Initialize everything. */
 var gol = null, controller = null;
 
@@ -247,3 +246,5 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var canvas = document.getElementById('canvas')
     gol = new GOL(canvas).draw().start();
 });
+
+module.exports = GOL;
