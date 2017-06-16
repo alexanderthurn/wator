@@ -26,10 +26,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var showInfos = () => {
         showText(urlParam + ' ' + scaleFactor.toFixed(1) + (world ? (' ' + world.width + 'x' + world.height) : ''));
     }
-    var dt;
+    var dtRender, dtCalc;
+    var timeRender = new Date().getTime();
+    var timeCalc = new Date().getTime();
     var canvas = document.getElementById('canvas')
     var ctx = canvas.getContext("2d")
-    var time;
     var worldRenderer;
     var updateMode = UPDATE_MODE_SINGLETHREAD;
     var worldWebWorker;
@@ -169,6 +170,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 world.fillWithFishes(fishesPositionsToBePlaced);
                 worldRenderer.renderImage(world, canvas, ctx);
                 worldWebWorker.postMessage(e.data, [e.data.buffer]);
+                updateDTCalc()
             }, false);
         }
 
@@ -181,29 +183,31 @@ document.addEventListener("DOMContentLoaded", function (event) {
     };
 
     // render canvas
-    var updateCanvas = function (options) {
+    var updateCanvas = function () {
         worldRenderer.render(world, canvas, ctx)
     };
 
-    var updateCanvasRegular = function () {
-
+    var updateDTFPS = function () {
         var now = new Date().getTime();
-        dt = now - (time || now);
+        dtRender = now - timeRender;
+        timeRender = now;
+    }
 
-        var dtFactor = dt / 30.0;
-        if (dtFactor < 0.001) {
-            dtFactor = 0.001;
-        } else if (dtFactor > 5.0) {
-            dtFactor = 5.0;
-        }
-        time = now;
+    var updateDTCalc = function () {
+        var now = new Date().getTime();
+        dtCalc = now - timeCalc;
+        timeCalc = now;
+    }
+    var updateCanvasRegular = function () {
+        updateDTFPS()
 
         if (updateMode === UPDATE_MODE_SINGLETHREAD) {
             world.fillWithFishes(fishesPositionsToBePlaced);
             world.doWorldTick()
+            updateDTCalc()
         }
 
-        updateCanvas({dtFactor: dtFactor})
+        updateCanvas()
         window.requestAnimationFrame(updateCanvasRegular)
 
     };
@@ -213,13 +217,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
             setInterval(() => {
                 world.fillWithFishes(fishesPositionsToBePlaced);
                 world.doWorldTick();
+                updateDTCalc()
             }, 30)
         }
     };
 
     var uppdateFPSRegular = function () {
         setInterval(() => {
-            showFPS(Math.floor(1000.0 / dt))
+            showFPS(Math.floor(1000.0 / dtCalc) + ' / ' + Math.floor(1000.0 / dtRender))
         }, 1000);
     };
 
