@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var elemDescription = document.getElementById('description');
     var elemFPS = document.getElementById('fps');
     var world;
-    var brushSizeHalf = Math.ceil((helper.getSearchParam('brushSize') || 5) * 0.5);
+    var brushSizeHalf = Math.ceil((helper.getSearchParam('brushSize') || 20) * 0.5);
     var fishesPositionsToBePlaced = [];
 
     var urlParam = helper.getSearchParam('calcMethod') || 'UI';
