@@ -27,6 +27,8 @@ var config = {
         contentBase: path.join(__dirname, "dist"),
         compress: false,
         port: 9000,
+        host: '0.0.0.0',
+        disableHostCheck: true,
         watchContentBase: true
     },
     entry: "./src/js/main.js",

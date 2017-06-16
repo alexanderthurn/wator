@@ -29,8 +29,8 @@ class World {
             let x, y, elem;
 
             do {
-                x = Math.round(Math.random() * this.width);
-                y = Math.round(Math.random() * this.height);
+                x = Math.floor(Math.random() * this.width);
+                y = Math.floor(Math.random() * this.height);
             } while (!this.isFree(x, y))
 
             elem = WorldElement.create(WorldElement.TYPE_FISH, this.fishEnergy, Math.floor(Math.random() * this.fishReproductionTicks) | 4)
@@ -42,8 +42,8 @@ class World {
             let x, y, elem;
 
             do {
-                x = Math.round(Math.random() * this.width);
-                y = Math.round(Math.random() * this.height);
+                x = Math.floor(Math.random() * this.width);
+                y = Math.floor(Math.random() * this.height);
             } while (!this.isFree(x, y))
 
             elem = WorldElement.create(WorldElement.TYPE_SHARK, this.sharkEnergy, Math.floor(Math.random() * this.sharkReproductionTicks) | 4)
@@ -55,7 +55,15 @@ class World {
     fillWithFishes = (fishPositionArray) => {
         while (fishPositionArray.length > 0) {
             var pos = fishPositionArray.pop();
-            var elem = WorldElement.create(WorldElement.TYPE_FISH, this.fishEnergy, Math.floor(Math.random() * this.fishReproductionTicks) | 4)
+            var elem;
+            if (pos.type === WorldElement.TYPE_FISH) {
+                elem = WorldElement.create(WorldElement.TYPE_FISH, this.fishEnergy, Math.floor(Math.random() * this.fishReproductionTicks) | 4)
+            } else if (pos.type === WorldElement.TYPE_SHARK) {
+                elem = WorldElement.create(WorldElement.TYPE_SHARK, this.sharkEnergy, Math.floor(Math.random() * this.sharkReproductionTicks) | 4)
+            } else {
+                elem = 0;
+            }
+
             this.setValueAtPosition(pos.x, pos.y, elem)
         }
 

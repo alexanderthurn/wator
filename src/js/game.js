@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             updateMode = UPDATE_MODE_WEBWORKER;
             break;
     }
-    var scaleFactor = parseFloat(helper.getSearchParam('scaleFactor') || 0.5);
+    var scaleFactor = parseFloat(helper.getSearchParam('scaleFactor') || 0.2);
 
 
     if (scaleFactor < 0.99) {
@@ -69,19 +69,57 @@ document.addEventListener("DOMContentLoaded", function (event) {
             y: Math.floor((evt.clientY - rect.top) * scaleFactor)
         };
     }
-    canvas.addEventListener('mousemove', function (evt) {
-        var mousePos = getMousePos(canvas, evt);
-        for (var x = mousePos.x - brushSizeHalf; x < mousePos.x + brushSizeHalf; x++) {
-            for (var y = mousePos.y - brushSizeHalf; y < mousePos.y + brushSizeHalf; y++) {
+
+    var getTouchPos = function (canvas, touchEvent) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: Math.floor((touchEvent.touches[0].clientX - rect.left) * scaleFactor),
+            y: Math.floor((touchEvent.touches[0].clientY - rect.top) * scaleFactor)
+        };
+    }
+
+    var placeFishes = function (mousePos, type, _brushSizeHalf) {
+        for (var x = mousePos.x - _brushSizeHalf; x < mousePos.x + _brushSizeHalf; x++) {
+            for (var y = mousePos.y - _brushSizeHalf; y < mousePos.y + _brushSizeHalf; y++) {
                 fishesPositionsToBePlaced.push({
                     x: x,
                     y: y,
-                    type: evt.buttons ? WorldElement.TYPE_SHARK : WorldElement.TYPE_FISH
+                    type: type
                 });
             }
         }
+    }
+
+    canvas.addEventListener('mousemove', function (evt) {
+        var mousePos = getMousePos(canvas, evt);
+        if (evt.buttons > 0 || helper.isTouchDevice()) {
+            if (helper.isTouchDevice() && mousePos.x < canvas.width * 0.5) {
+                placeFishes(mousePos, WorldElement.TYPE_SHARK, brushSizeHalf)
+            } else {
+                placeFishes(mousePos, evt.buttons === 2 ? WorldElement.TYPE_SHARK : (evt.buttons === 4 ? WorldElement.TYPE_EMPTY : WorldElement.TYPE_FISH), (evt.buttons === 4 ? brushSizeHalf * 8 : brushSizeHalf))
+            }
+
+        }
+
     }, false);
 
+    canvas.addEventListener('mousedown', function (evt) {
+        var mousePos = getMousePos(canvas, evt);
+        if (evt.buttons > 0) {
+            placeFishes(mousePos, evt.buttons === 2 ? WorldElement.TYPE_SHARK : (evt.buttons === 4 ? WorldElement.TYPE_EMPTY : WorldElement.TYPE_FISH), (evt.buttons === 4 ? brushSizeHalf * 8 : brushSizeHalf))
+        }
+
+    }, false);
+
+    /*
+     canvas.addEventListener('touchmove', (evt) => {
+     var mousePos = getTouchPos(canvas, evt);
+     alert(mousePos.x, mousePos.y)
+     if (evt.buttons > 0) {
+     placeFishes(mousePos, evt.touches.length === 2 ? WorldElement.TYPE_SHARK : (evt.length === 3 ? WorldElement.TYPE_EMPTY : WorldElement.TYPE_FISH), (evt.buttons === 3 ? brushSizeHalf * 8 : brushSizeHalf))
+     }
+     }, false);
+     */
 
     if (!window.requestAnimationFrame) {
         helper.injectRequestAnimationFrame();
@@ -109,7 +147,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
             sharkEnergy: parseInt(helper.getSearchParam('sharkEnergy') || 20)
         }
 
-        console.log(options)
 
         world = new World(options);
         world.init()
@@ -162,7 +199,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         time = now;
 
         if (updateMode === UPDATE_MODE_SINGLETHREAD) {
-            console.log('fillWithFishes', 'UPDATE_MODE_SINGLETHREAD')
             world.fillWithFishes(fishesPositionsToBePlaced);
             world.doWorldTick()
         }
@@ -175,7 +211,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var updateWorldRegular = function () {
         if (updateMode === UPDATE_MODE_INTERVAL) {
             setInterval(() => {
-                console.log('fillWithFishes', 'UPDATE_MODE_INTERVAL')
                 world.fillWithFishes(fishesPositionsToBePlaced);
                 world.doWorldTick();
             }, 30)

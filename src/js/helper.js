@@ -137,6 +137,12 @@ function serialize(obj) {
     return str.join("&");
 }
 
+function isTouchDevice() {
+    return 'ontouchstart' in window        // works on most browsers
+        || 'onmsgesturechange' in window;  // works on IE10 with some false positives
+};
+
+
 module.exports = {
     getCursorPosition: getCursorPosition,
     setRequestAnmationFrameWithFallback: setRequestAnmationFrameWithFallback,
@@ -146,7 +152,8 @@ module.exports = {
     injectRequestAnimationFrame: injectRequestAnimationFrame,
     getQueryParams: getQueryParams,
     serialize: serialize,
-    getSearchParam: getSearchParam
+    getSearchParam: getSearchParam,
+    isTouchDevice: isTouchDevice
 }
 
 
