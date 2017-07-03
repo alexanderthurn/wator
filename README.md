@@ -5,13 +5,16 @@
 
 Wa-Tor is a population dynamics simulation devised by Alexander Keewatin Dewdney[1] and presented in the December 1984 issue of Scientific American in a 5-page article entitled "Computer Recreations: Sharks and fish wage an ecological war on the toroidal planet Wa-Tor".
 
+* [Wikipedia article](https://en.wikipedia.org/wiki/Wa-Tor) about Wa-Tor
+* [".c" implementation](wator.c) Thank you Stephan K. for your awesomeness !
+* [PDF Paper](wator_dewdney.pdf) by Alexander Keewatin Dewdney
+
 ## Demo
 
 You can try the app [here](https://web.froso.de/fish/dev). Make sure to use a modern browser supporting the canvas element.
 
 ## Screenshots
 
-TODO
 ![Screenshot1](misc/screenshot1.jpg?raw=true "Screenshot1")
 ![Screenshot2](misc/screenshot2.jpg?raw=true "Screenshot2")
 
