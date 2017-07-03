@@ -1,5 +1,5 @@
 {
-  "name": "fish",
+  "name": "Wator",
   "version": "1.3.0",
   "description": "fisshy",
   "main": "dist/bundle.js",
@@ -12,20 +12,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://alexanderthurn@github.com/alexanderthurn/shutup.git"
+    "url": "git+https://alexanderthurn@github.com/alexanderthurn/wator.git"
   },
   "keywords": [
-    "shutup",
+    "wator",
     "noise",
-    "microphone",
+    "canvas",
     "html5"
   ],
   "author": "Alexander Thurn",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/alexanderthurn/shutup/issues"
+    "url": "https://github.com/alexanderthurn/wator/issues"
   },
-  "homepage": "https://github.com/alexanderthurn/shutup#readme",
+  "homepage": "https://github.com/alexanderthurn/wator#readme",
   "devDependencies": {
     "babel-core": "^6.24.1",
     "babel-loader": "^7.0.0",
