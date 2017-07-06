@@ -1,4 +1,4 @@
-var WorldElement = require('./WorldElement')
+var WorldElement = require('../WorldElement')
 
 class WorldRendererSync {
 

@@ -1,12 +1,12 @@
-var helper = require('./helper.js')
+var helper = require('../helper.js')
 var World = require('./World.js')
 var WorldElement = require('./WorldElement.js')
 
-var WorldWebWorker = require('worker-loader!./WorldWebWorker.js')
+var WorldWebWorker = require('worker-loader!./webworker/WorldWebWorker.js')
 
-var WorldRendererSync = require('./WorldRendererSync.js')
-var WorldRendererWebWorker = require('./WorldRendererWebWorker.js')
-var WorldRendererShader = require('./WorldRendererShader.js')
+var WorldRendererSync = require('./uithread/WorldRendererSync.js')
+var WorldRendererWebWorker = require('./webworker/WorldRendererWebWorker.js')
+var WorldRendererShader = require('./shader/WorldRendererShader.js')
 
 const UPDATE_MODE_SINGLETHREAD = 0;
 const UPDATE_MODE_INTERVAL = 1;

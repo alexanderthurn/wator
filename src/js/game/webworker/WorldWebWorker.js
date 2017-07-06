@@ -1,4 +1,4 @@
-var World = require('./World.js')
+var World = require('../World.js')
 var world;
 
 
@@ -11,9 +11,9 @@ self.addEventListener('message', function (e) {
         world.setData(e.data);
     }
 
-    
+
     world.doWorldTick();
-    
+
     var data = world.getData();
     self.postMessage(data, [data.buffer]);
 }, false);
