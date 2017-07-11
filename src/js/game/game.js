@@ -3,7 +3,7 @@ var World = require('./World.js')
 var WorldElement = require('./WorldElement.js')
 
 var WorldWebWorker = require('worker-loader!./webworker/WorldWebWorker.js')
-var WorldMultiWebWorker = require('worker-loader!./multiwebworker/WorldMultiWebWorker.js')
+var WorldImageWebWorker = require('worker-loader!./multiwebworker/WorldImageWebWorker.js')
 
 var WorldRendererSync = require('./uithread/WorldRendererSync.js')
 var WorldRendererWebWorker = require('./webworker/WorldRendererWebWorker.js')
@@ -13,7 +13,7 @@ const UPDATE_MODE_SINGLETHREAD = 0;
 const UPDATE_MODE_INTERVAL = 1;
 const UPDATE_MODE_WEBWORKER = 2;
 const UPDATE_MODE_SHADER = 3;
-const UPDATE_MODE_MULTI_WEBWORKER = 4;
+const UPDATE_MODE_IMAGE_WEBWORKER = 4;
 
 
 /* start as soon as things are set up */
@@ -55,8 +55,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         case 'WEBWORKER':
             updateMode = UPDATE_MODE_WEBWORKER;
             break;
-        case 'WEBWORKER_MULTI':
-            updateMode = UPDATE_MODE_MULTI_WEBWORKER;
+        case 'WEBWORKER_IMAGE':
+            updateMode = UPDATE_MODE_IMAGE_WEBWORKER;
             break;
         case 'SHADER':
             updateMode = UPDATE_MODE_SHADER;
@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
         if (updateMode === UPDATE_MODE_WEBWORKER) {
             worldRenderer = new WorldRendererWebWorker()
-        } else if (updateMode === UPDATE_MODE_MULTI_WEBWORKER) {
+        } else if (updateMode === UPDATE_MODE_IMAGE_WEBWORKER) {
             worldRenderer = new WorldRendererWebWorker()
         } else if (updateMode === UPDATE_MODE_SHADER) {
             worldRenderer = new WorldRendererShader();
@@ -159,12 +159,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
             worldWebWorker.terminate();
         }
 
-        if (updateMode === UPDATE_MODE_WEBWORKER || updateMode === UPDATE_MODE_MULTI_WEBWORKER) {
+        if (updateMode === UPDATE_MODE_WEBWORKER || updateMode === UPDATE_MODE_IMAGE_WEBWORKER) {
 
             if (updateMode === UPDATE_MODE_WEBWORKER) {
                 worldWebWorker = new WorldWebWorker();
             } else {
-                worldWebWorker = new WorldMultiWebWorker();
+                worldWebWorker = new WorldImageWebWorker();
             }
 
             worldWebWorker.postMessage({options: options, data: data}, [data.buffer]);
