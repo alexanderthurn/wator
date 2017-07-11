@@ -155,10 +155,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
             worldRenderer = new WorldRendererSync();
         }
 
+        if (worldWebWorker) {
+            worldWebWorker.terminate();
+        }
+
         if (updateMode === UPDATE_MODE_WEBWORKER || updateMode === UPDATE_MODE_MULTI_WEBWORKER) {
-            if (worldWebWorker) {
-                worldWebWorker.terminate();
-            }
 
             if (updateMode === UPDATE_MODE_WEBWORKER) {
                 worldWebWorker = new WorldWebWorker();

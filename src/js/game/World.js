@@ -17,38 +17,43 @@ class World {
         this.noTicks = 0;
     };
 
-    init = () => {
+    init = (options) => {
         this.data = new Uint32Array(this.width * this.height);
+
+
         for (var x = 0; x < this.width; x++) {
             for (var y = 0; y < this.height; y++) {
                 this.setValueAtPosition(x, y, 0)
             }
         }
 
-        for (var f = 0; f < this.fishStartCount; f++) {
-            let x, y, elem;
+        if (!options || !options.empty) {
+            for (var f = 0; f < this.fishStartCount; f++) {
+                let x, y, elem;
 
-            do {
-                x = Math.floor(Math.random() * this.width);
-                y = Math.floor(Math.random() * this.height);
-            } while (!this.isFree(x, y))
+                do {
+                    x = Math.floor(Math.random() * this.width);
+                    y = Math.floor(Math.random() * this.height);
+                } while (!this.isFree(x, y))
 
-            elem = WorldElement.create(WorldElement.TYPE_FISH, this.fishEnergy, Math.floor(Math.random() * this.fishReproductionTicks) | 4)
-            this.setValueAtPosition(x, y, elem)
+                elem = WorldElement.create(WorldElement.TYPE_FISH, this.fishEnergy, Math.floor(Math.random() * this.fishReproductionTicks) | 4)
+                this.setValueAtPosition(x, y, elem)
 
+            }
+
+            for (var f = 0; f < this.sharkStartCount; f++) {
+                let x, y, elem;
+
+                do {
+                    x = Math.floor(Math.random() * this.width);
+                    y = Math.floor(Math.random() * this.height);
+                } while (!this.isFree(x, y))
+
+                elem = WorldElement.create(WorldElement.TYPE_SHARK, this.sharkEnergy, Math.floor(Math.random() * this.sharkReproductionTicks) | 4)
+                this.setValueAtPosition(x, y, elem)
+            }
         }
 
-        for (var f = 0; f < this.sharkStartCount; f++) {
-            let x, y, elem;
-
-            do {
-                x = Math.floor(Math.random() * this.width);
-                y = Math.floor(Math.random() * this.height);
-            } while (!this.isFree(x, y))
-
-            elem = WorldElement.create(WorldElement.TYPE_SHARK, this.sharkEnergy, Math.floor(Math.random() * this.sharkReproductionTicks) | 4)
-            this.setValueAtPosition(x, y, elem)
-        }
 
     };
 
