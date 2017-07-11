@@ -1,19 +1,18 @@
 var World = require('../World.js')
-var worldInternal;
-var worldExternal;
+var WorldRendererWebWorker = require('../webworker/WorldRendererWebWorker.js')
 
-
+var world;
+var imageData = null;
+var worldRenderer = new WorldRendererWebWorker()
 self.addEventListener('message', function (e) {
 
     if (e.data.options) {
-        worldInternal = new World(e.data.options);
-        worldInternal.setData(e.data.data);
+        world = new World(e.data.options);
+        world.setData(e.data.data);
+    }
 
-        worldExternal = new World(e.data.options);
-        worldExternal.init({empty: true});
-
-    } else {
-        worldExternal.setData(e.data);
+    if (e.data.imageData) {
+        imageData = e.data.imageData;
     }
 }, false);
 
@@ -21,19 +20,15 @@ console.log('webworker')
 
 
 const update = () => {
-    if (worldInternal && worldExternal) {
+    if (world) {
 
-        worldInternal.doWorldTick();
+        world.doWorldTick();
 
-        var dataInternal = worldInternal.getData();
-        var dataExternal = worldExternal.getData();
-
-
-        if (dataExternal && dataExternal.length > 0) {
-            dataExternal.set(dataInternal);
-            self.postMessage(dataExternal, [dataExternal.buffer]);
+        console.log('render', imageData)
+        if (imageData) {
+            worldRenderer.pureRender(world, imageData, false);
+            self.postMessage(imageData, [imageData.data.buffer]);
         }
-
     }
     setTimeout(() => {
         update()

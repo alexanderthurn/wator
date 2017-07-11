@@ -41,34 +41,47 @@ class WorldRendererSync {
         data[imageDataindex + 3] = 255;
     };
 
-    renderImage = (world, canvas, ctx) => {
-        if (!this.imageData1 || this.imageData1.data.length !== world.length * 4) {
-            this.init(world, canvas, ctx);
-        }
-
+    pureRender = (world, imageData, doOldCheck) => {
         var renderedElements = 0;
         for (var i = 0; i < world.length; i += 1) {
             let element = world.getValueAtIndexUnsafe(i);
             let elementType = WorldElement.typeOf(element);
 
-            if (elementType !== this.oldTypeData1[i]) {
-                this.oldTypeData1[i] = elementType;
+            if (!doOldCheck || elementType !== this.oldTypeData1[i]) {
+                if (doOldCheck) {
+                    this.oldTypeData1[i] = elementType;
+                }
                 renderedElements++;
                 switch (elementType) {
                     case WorldElement.TYPE_SHARK:
-                        this.renderShark(this.imageData1.data, i * 4);
+                        this.renderShark(imageData.data, i * 4);
                         break;
                     case WorldElement.TYPE_FISH:
-                        this.renderFish(this.imageData1.data, i * 4);
+                        this.renderFish(imageData.data, i * 4);
                         break;
                     default:
-                        this.renderEmpty(this.imageData1.data, i * 4);
+                        this.renderEmpty(imageData.data, i * 4);
                         break;
                 }
             }
 
 
         }
+    };
+    renderImage = (world, canvas, ctx) => {
+        if (!this.imageData1 || this.imageData1.data.length !== world.length * 4) {
+            this.init(world, canvas, ctx);
+        }
+
+        var renderedElements = this.pureRender(world, this.imageData1, true);
+        this.pureSwapImageData(this.imageData1);
+
+
+        return renderedElements;
+    };
+
+    pureSwapImageData = (imageData) => {
+        this.imageData1 = imageData;
 
         var temp = this.imageData2;
         this.imageData2 = this.imageData1;
@@ -77,8 +90,10 @@ class WorldRendererSync {
         temp = this.oldTypeData2;
         this.oldTypeData2 = this.oldTypeData1;
         this.oldTypeData1 = temp;
+    }
 
-        return renderedElements;
+    getImageData = () => {
+        return this.imageData1;
     };
 
 

@@ -155,6 +155,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
             worldRenderer = new WorldRendererSync();
         }
 
+        canvas.width = options.width;
+        canvas.height = options.height;
+
+        worldRenderer.init(world, canvas, ctx);
         if (worldWebWorker) {
             worldWebWorker.terminate();
         }
@@ -163,23 +167,37 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
             if (updateMode === UPDATE_MODE_WEBWORKER) {
                 worldWebWorker = new WorldWebWorker();
+                worldWebWorker.postMessage({options: options, data: data}, [data.buffer]);
             } else {
+                let imageData = worldRenderer.getImageData()
                 worldWebWorker = new WorldImageWebWorker();
+                worldWebWorker.postMessage({
+                    options: options,
+                    data: data,
+                    imageData: imageData
+                }, [data.buffer, imageData.data.buffer]);
+
             }
 
-            worldWebWorker.postMessage({options: options, data: data}, [data.buffer]);
+
             worldWebWorker.addEventListener('message', function (e) {
-                world.setData(e.data);
-                world.fillWithFishes(fishesPositionsToBePlaced);
-                worldRenderer.renderImage(world, canvas, ctx);
-                worldWebWorker.postMessage(e.data, [e.data.buffer]);
+
+                if (updateMode === UPDATE_MODE_WEBWORKER) {
+                    world.setData(e.data);
+                    world.fillWithFishes(fishesPositionsToBePlaced);
+                    worldRenderer.renderImage(world, canvas, ctx);
+                    worldWebWorker.postMessage(e.data, [e.data.buffer]);
+                } else {
+                    worldRenderer.pureSwapImageData(e.imageData);
+                    let imageDataToSend = worldRenderer.getImageData();
+                    worldWebWorker.postMessage({imageData: imageDataToSend}, [imageDataToSend.data.buffer]);
+
+                }
                 updateDTCalc()
             }, false);
         }
 
 
-        canvas.width = options.width;
-        canvas.height = options.height;
         console.log('init done', updateMode, options)
 
         showInfos();
